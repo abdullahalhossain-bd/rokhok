@@ -91,6 +91,14 @@ public class MainActivity extends FlutterActivity {
                         break;
                     }
 
+                    case "getUploadedVideoUrl": {
+                        String eventId = call.argument("eventId");
+                        LocalStorageManager storage = new LocalStorageManager(getApplicationContext());
+                        String url = storage.getUploadedVideoUrl(eventId);
+                        result.success(url);
+                        break;
+                    }
+
                     case "sendTestSMS": {
                         String phone = call.argument("phone");
                         String name  = call.argument("name");

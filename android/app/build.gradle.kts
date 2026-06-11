@@ -37,6 +37,8 @@ dependencies {
     // AndroidX
     implementation("androidx.core:core:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
+    // HTTP client for multipart uploads from native Android
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
     
     // Testing
     testImplementation("junit:junit:4.13.2")
