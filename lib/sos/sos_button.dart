@@ -3,11 +3,11 @@
 // Press-and-hold for 3 seconds to trigger — prevents accidental activation.
 // Visual feedback: circular fill progress + pulsing glow rings.
 
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'sos_bloc.dart';
+import 'vibration_channel.dart';
 
 class SOSButton extends StatefulWidget {
   const SOSButton({super.key});
@@ -64,8 +64,10 @@ class _SOSButtonState extends State<SOSButton> with TickerProviderStateMixin {
     }
   }
 
-  void _triggerSOS() {
+  void _triggerSOS() async {
     HapticFeedback.heavyImpact();
+    await VibrationChannel.vibrateSOS();
+
     // TODO: Replace with real user data from AuthBloc / user provider
     context.read<SOSBloc>().add(const SOSTriggerRequested(
       userId: 'current_user_id',

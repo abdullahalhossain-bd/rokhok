@@ -1,20 +1,16 @@
-// android/app/src/main/java/com/rokhok/services/SMSDispatchService.java
-// Sends emergency SMS to all contacts using Android SmsManager.
-// WHY NATIVE SMS (not Twilio/API)?
-//   1. Works offline — no internet needed during an emergency
-//   2. Delivers even on 2G networks
-//   3. No backend cost per message
-//   4. Faster — no HTTP round trip
-
-package com.rokhok.services;
+package com.example.safety;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.telephony.SmsManager;
 import android.util.Log;
 
 import java.util.ArrayList;
 
+/**
+ * Enhanced SOS Dispatch Service.
+ * Sends SMS to emergency contacts with location link.
+ * Called from RokhokForegroundService when SOS is triggered.
+ */
 public class SMSDispatchService extends IntentService {
 
     private static final String TAG = "SMSDispatchService";
@@ -22,9 +18,18 @@ public class SMSDispatchService extends IntentService {
     public static final String EXTRA_CONTACTS  = "contacts";   // ArrayList<String> "name|phone"
     public static final String EXTRA_LATITUDE  = "latitude";
     public static final String EXTRA_LONGITUDE = "longitude";
+    public static final String EXTRA_EVENT_ID  = "event_id";
+
+    private LocalStorageManager storageManager;
 
     public SMSDispatchService() {
         super("SMSDispatchService");
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        storageManager = new LocalStorageManager(this);
     }
 
     @Override
@@ -34,6 +39,7 @@ public class SMSDispatchService extends IntentService {
         ArrayList<String> contacts = intent.getStringArrayListExtra(EXTRA_CONTACTS);
         double lat = intent.getDoubleExtra(EXTRA_LATITUDE, 0.0);
         double lng = intent.getDoubleExtra(EXTRA_LONGITUDE, 0.0);
+        String eventId = intent.getStringExtra(EXTRA_EVENT_ID);
 
         if (contacts == null || contacts.isEmpty()) {
             Log.w(TAG, "No contacts to send SMS to");
@@ -43,6 +49,7 @@ public class SMSDispatchService extends IntentService {
         String mapsLink = "https://maps.google.com/?q=" + lat + "," + lng;
         String message = buildSOSMessage(mapsLink);
 
+        int sentCount = 0;
         for (String contact : contacts) {
             // Format: "name|+8801700000000"
             String[] parts = contact.split("\\|");
@@ -51,8 +58,19 @@ public class SMSDispatchService extends IntentService {
             String name  = parts[0];
             String phone = parts[1];
 
-            sendSMS(phone, message);
-            Log.d(TAG, "SOS SMS sent to: " + name + " (" + phone + ")");
+            if (sendSMS(phone, message)) {
+                sentCount++;
+                Log.d(TAG, "SOS SMS sent to: " + name + " (" + phone + ")");
+            } else {
+                Log.w(TAG, "Failed to send SMS to: " + name);
+            }
+        }
+
+        // Store result locally
+        if (eventId != null && storageManager != null) {
+            String details = String.format("SMS dispatched to %d/%d contacts", 
+                sentCount, contacts.size());
+            storageManager.logEventToFile(eventId, details);
         }
     }
 
@@ -63,9 +81,13 @@ public class SMSDispatchService extends IntentService {
                 "Please call me or contact emergency services immediately.";
     }
 
-    private void sendSMS(String phone, String message) {
+    /**
+     * Send SMS and return success status
+     */
+    private boolean sendSMS(String phone, String message) {
         try {
-            SmsManager smsManager = SmsManager.getDefault();
+            android.telephony.SmsManager smsManager = 
+                android.telephony.SmsManager.getDefault();
 
             // Split long messages — SMS limit is 160 chars
             if (message.length() > 160) {
@@ -76,10 +98,10 @@ public class SMSDispatchService extends IntentService {
             } else {
                 smsManager.sendTextMessage(phone, null, message, null, null);
             }
+            return true;
         } catch (Exception e) {
             Log.e(TAG, "Failed to send SMS to " + phone + ": " + e.getMessage());
-            // ⚠️ Common failure reason: SEND_SMS permission not granted.
-            // Handled at Dart side via permission_handler before triggering SOS.
+            return false;
         }
     }
 }
