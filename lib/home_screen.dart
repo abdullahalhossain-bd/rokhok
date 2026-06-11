@@ -1,30 +1,8 @@
+import 'crime_map_screen.dart';
+import 'map/crime_map_screen.dart';
 // ============================================================
 // lib/presentation/home/home_screen.dart
 // Home Dashboard + Bottom Navigation Shell for Rokhok
-// ============================================================
-//
-// STRUCTURE:
-//   HomeScreen          → Bottom nav shell (IndexedStack, persistent)
-//   _HomeTab            → Dashboard content (scrollable)
-//   _MapTab             → Placeholder (Crime Map — Phase 4)
-//   _TrackingTab        → Placeholder (Live Tracking — Phase 2)
-//   _ProfileTab         → Placeholder (Profile — Phase 5)
-//
-// WIDGETS (private, single-responsibility):
-//   _AppColors          → Design tokens (matches splash _C)
-//   _TopBar             → Greeting + notification bell + status chip
-//   _SOSHeroCard        → Big red SOS trigger card
-//   _StatusGrid         → 2-col quick-stat cards
-//   _QuickActions       → Icon button row (4 actions)
-//   _RecentAlerts       → Scrollable alert feed
-//   _BottomNavBar       → Custom nav bar with red active indicator
-//
-// HOW TO WIRE:
-//   In your routes map (main.dart or go_router):
-//     '/home': (_) => const HomeScreen()
-//
-//   Or from SplashScreen:
-//     Navigator.of(context).pushReplacementNamed('/home');
 // ============================================================
 
 import 'package:flutter/material.dart';
@@ -36,33 +14,23 @@ import 'sos/sos_screen.dart';
 
 // ── Design tokens ─────────────────────────────────────────────
 class _AppColors {
-  // Backgrounds
   static const bg = Color(0xFF0A0A0A);
   static const surface = Color(0xFF141414);
   static const surfaceHigh = Color(0xFF1C1C1C);
   static const surfaceBorder = Color(0xFF242424);
-
-  // Accent
   static const red = Color(0xFFD62828);
   static const redDim = Color(0xFF9B1B1B);
   static const redGlow = Color(0x22D62828);
   static const redSubtle = Color(0xFF1A0A0A);
-
-  // Text
   static const textPrimary = Color(0xFFF2F2F2);
   static const textSecondary = Color(0xFF888888);
   static const textMuted = Color(0xFF555555);
-
-  // Status
   static const green = Color(0xFF22C55E);
   static const amber = Color(0xFFF59E0B);
   static const greenDim = Color(0xFF052010);
   static const amberDim = Color(0xFF1A1000);
 }
 
-// ─────────────────────────────────────────────────────────────
-// ROOT SHELL — owns bottom navigation state
-// ─────────────────────────────────────────────────────────────
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -73,7 +41,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  // Each tab is kept alive in an IndexedStack — no rebuild on tab switch
   static const List<Widget> _tabs = [
     _HomeTab(),
     _MapTab(),
@@ -98,7 +65,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _AppColors.bg,
-      // IndexedStack keeps all tabs mounted — no state loss on tab switch
       body: IndexedStack(
         index: _currentIndex,
         children: _tabs,
@@ -111,9 +77,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// HOME TAB — the dashboard content
-// ─────────────────────────────────────────────────────────────
 class _HomeTab extends StatelessWidget {
   const _HomeTab();
 
@@ -123,47 +86,34 @@ class _HomeTab extends StatelessWidget {
       child: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // Top bar
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: const _TopBar(),
             ),
           ),
-
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
-
-          // SOS hero card
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: const _SOSHeroCard(),
             ),
           ),
-
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-          // Status grid
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: const _StatusGrid(),
             ),
           ),
-
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-          // Quick actions
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: const _QuickActions(),
             ),
           ),
-
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-          // Recent alerts header
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -200,13 +150,8 @@ class _HomeTab extends StatelessWidget {
               ),
             ),
           ),
-
           const SliverToBoxAdapter(child: SizedBox(height: 12)),
-
-          // Alert list
           const SliverToBoxAdapter(child: _RecentAlerts()),
-
-          // Bottom padding so last card isn't clipped by nav bar
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
         ],
       ),
@@ -214,9 +159,6 @@ class _HomeTab extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// TOP BAR
-// ─────────────────────────────────────────────────────────────
 class _TopBar extends StatelessWidget {
   const _TopBar();
 
@@ -224,7 +166,6 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // Avatar
         Container(
           width: 42,
           height: 42,
@@ -244,10 +185,7 @@ class _TopBar extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(width: 12),
-
-        // Greeting
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,8 +210,6 @@ class _TopBar extends StatelessWidget {
             ],
           ),
         ),
-
-        // Safe status chip
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
@@ -315,10 +251,7 @@ class _TopBar extends StatelessWidget {
             ],
           ),
         ),
-
         const SizedBox(width: 10),
-
-        // Notification bell
         _IconBtn(
           icon: Icons.notifications_outlined,
           onTap: () {},
@@ -329,9 +262,6 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// SOS HERO CARD — the most important UI element
-// ─────────────────────────────────────────────────────────────
 class _SOSHeroCard extends StatefulWidget {
   const _SOSHeroCard();
 
@@ -352,7 +282,6 @@ class _SOSHeroCardState extends State<_SOSHeroCard>
       vsync: this,
       duration: const Duration(milliseconds: 1800),
     )..repeat(reverse: true);
-
     _pulseScale = Tween<double>(begin: 0.92, end: 1.08).animate(
       CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
     );
@@ -377,7 +306,6 @@ class _SOSHeroCardState extends State<_SOSHeroCard>
     return BlocBuilder<SOSBloc, SOSState>(
       builder: (context, state) {
         final sosActive = state is SOSActive || state is SOSCancelling;
-
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.all(24),
@@ -392,12 +320,12 @@ class _SOSHeroCardState extends State<_SOSHeroCard>
             ),
             boxShadow: sosActive
                 ? [
-                    BoxShadow(
-                      color: _AppColors.red.withOpacity(0.18),
-                      blurRadius: 32,
-                      spreadRadius: 4,
-                    ),
-                  ]
+              BoxShadow(
+                color: _AppColors.red.withOpacity(0.18),
+                blurRadius: 32,
+                spreadRadius: 4,
+              ),
+            ]
                 : null,
           ),
           child: Column(
@@ -471,9 +399,7 @@ class _SOSHeroCardState extends State<_SOSHeroCard>
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                sosActive
-                                    ? Icons.shield
-                                    : Icons.shield_outlined,
+                                sosActive ? Icons.shield : Icons.shield_outlined,
                                 color: Colors.white,
                                 size: 22,
                               ),
@@ -592,9 +518,6 @@ class _SOSActiveLabel extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// STATUS GRID — 2×2 quick-stat cards
-// ─────────────────────────────────────────────────────────────
 class _StatusGrid extends StatelessWidget {
   const _StatusGrid();
 
@@ -697,29 +620,14 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// QUICK ACTIONS — 4 icon buttons in a row
-// ─────────────────────────────────────────────────────────────
 class _QuickActions extends StatelessWidget {
   const _QuickActions();
 
   static const _actions = [
-    _QuickAction(
-      icon: Icons.share_location_outlined,
-      label: 'Share\nlocation',
-    ),
-    _QuickAction(
-      icon: Icons.videocam_outlined,
-      label: 'Silent\nvideo',
-    ),
-    _QuickAction(
-      icon: Icons.sms_outlined,
-      label: 'Alert\ncontacts',
-    ),
-    _QuickAction(
-      icon: Icons.bluetooth_searching_rounded,
-      label: 'Nearby\nalert',
-    ),
+    _QuickAction(icon: Icons.share_location_outlined, label: 'Share\nlocation'),
+    _QuickAction(icon: Icons.videocam_outlined,        label: 'Silent\nvideo'),
+    _QuickAction(icon: Icons.sms_outlined,             label: 'Alert\ncontacts'),
+    _QuickAction(icon: Icons.bluetooth_searching_rounded, label: 'Nearby\nalert'),
   ];
 
   @override
@@ -798,37 +706,14 @@ class _QuickActionBtn extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// RECENT ALERTS feed
-// ─────────────────────────────────────────────────────────────
 class _RecentAlerts extends StatelessWidget {
   const _RecentAlerts();
 
   static const _alerts = [
-    _AlertData(
-      type: 'SOS',
-      title: 'SOS alert triggered',
-      sub: '320m away · 4 min ago',
-      severity: _AlertSeverity.high,
-    ),
-    _AlertData(
-      type: 'CRIME',
-      title: 'Theft reported',
-      sub: '480m away · 22 min ago',
-      severity: _AlertSeverity.medium,
-    ),
-    _AlertData(
-      type: 'ZONE',
-      title: 'Entering moderate risk zone',
-      sub: '150m ahead · Just now',
-      severity: _AlertSeverity.medium,
-    ),
-    _AlertData(
-      type: 'SOS',
-      title: 'SOS resolved',
-      sub: '1.2km away · 1 hr ago',
-      severity: _AlertSeverity.resolved,
-    ),
+    _AlertData(type: 'SOS',   title: 'SOS alert triggered',       sub: '320m away · 4 min ago',  severity: _AlertSeverity.high),
+    _AlertData(type: 'CRIME', title: 'Theft reported',             sub: '480m away · 22 min ago', severity: _AlertSeverity.medium),
+    _AlertData(type: 'ZONE',  title: 'Entering moderate risk zone',sub: '150m ahead · Just now',  severity: _AlertSeverity.medium),
+    _AlertData(type: 'SOS',   title: 'SOS resolved',               sub: '1.2km away · 1 hr ago',  severity: _AlertSeverity.resolved),
   ];
 
   @override
@@ -866,29 +751,23 @@ class _AlertCard extends StatelessWidget {
   final _AlertData data;
   const _AlertCard({required this.data});
 
-  Color get _dotColor {
-    return switch (data.severity) {
-      _AlertSeverity.high => _AppColors.red,
-      _AlertSeverity.medium => _AppColors.amber,
-      _AlertSeverity.resolved => _AppColors.green,
-    };
-  }
+  Color get _dotColor => switch (data.severity) {
+    _AlertSeverity.high     => _AppColors.red,
+    _AlertSeverity.medium   => _AppColors.amber,
+    _AlertSeverity.resolved => _AppColors.green,
+  };
 
-  Color get _bgColor {
-    return switch (data.severity) {
-      _AlertSeverity.high => _AppColors.redSubtle,
-      _AlertSeverity.medium => _AppColors.amberDim,
-      _AlertSeverity.resolved => _AppColors.greenDim,
-    };
-  }
+  Color get _bgColor => switch (data.severity) {
+    _AlertSeverity.high     => _AppColors.redSubtle,
+    _AlertSeverity.medium   => _AppColors.amberDim,
+    _AlertSeverity.resolved => _AppColors.greenDim,
+  };
 
-  Color get _borderColor {
-    return switch (data.severity) {
-      _AlertSeverity.high => _AppColors.red.withOpacity(0.25),
-      _AlertSeverity.medium => _AppColors.amber.withOpacity(0.2),
-      _AlertSeverity.resolved => _AppColors.green.withOpacity(0.2),
-    };
-  }
+  Color get _borderColor => switch (data.severity) {
+    _AlertSeverity.high     => _AppColors.red.withOpacity(0.25),
+    _AlertSeverity.medium   => _AppColors.amber.withOpacity(0.2),
+    _AlertSeverity.resolved => _AppColors.green.withOpacity(0.2),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -901,7 +780,6 @@ class _AlertCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Severity dot
           Container(
             width: 8,
             height: 8,
@@ -909,18 +787,11 @@ class _AlertCard extends StatelessWidget {
               shape: BoxShape.circle,
               color: _dotColor,
               boxShadow: [
-                BoxShadow(
-                  color: _dotColor.withOpacity(0.5),
-                  blurRadius: 5,
-                  spreadRadius: 1,
-                ),
+                BoxShadow(color: _dotColor.withOpacity(0.5), blurRadius: 5, spreadRadius: 1),
               ],
             ),
           ),
-
           const SizedBox(width: 12),
-
-          // Type pill
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
             decoration: BoxDecoration(
@@ -937,62 +808,42 @@ class _AlertCard extends StatelessWidget {
               ),
             ),
           ),
-
           const SizedBox(width: 10),
-
-          // Text
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  data.title,
-                  style: const TextStyle(
-                    color: _AppColors.textPrimary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                Text(data.title,
+                    style: const TextStyle(
+                        color: _AppColors.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500)),
                 const SizedBox(height: 2),
-                Text(
-                  data.sub,
-                  style: const TextStyle(
-                    color: _AppColors.textSecondary,
-                    fontSize: 11,
-                  ),
-                ),
+                Text(data.sub,
+                    style: const TextStyle(
+                        color: _AppColors.textSecondary, fontSize: 11)),
               ],
             ),
           ),
-
-          Icon(
-            Icons.chevron_right_rounded,
-            color: _AppColors.textMuted,
-            size: 18,
-          ),
+          const Icon(Icons.chevron_right_rounded,
+              color: _AppColors.textMuted, size: 18),
         ],
       ),
     );
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// BOTTOM NAV BAR
-// ─────────────────────────────────────────────────────────────
 class _BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
-  const _BottomNavBar({
-    required this.currentIndex,
-    required this.onTap,
-  });
+  const _BottomNavBar({required this.currentIndex, required this.onTap});
 
   static const _items = [
-    _NavItem(icon: Icons.home_outlined, activeIcon: Icons.home_rounded, label: 'Home'),
-    _NavItem(icon: Icons.map_outlined, activeIcon: Icons.map_rounded, label: 'Map'),
+    _NavItem(icon: Icons.home_outlined,        activeIcon: Icons.home_rounded,        label: 'Home'),
+    _NavItem(icon: Icons.map_outlined,         activeIcon: Icons.map_rounded,         label: 'Map'),
     _NavItem(icon: Icons.my_location_outlined, activeIcon: Icons.my_location_rounded, label: 'Track'),
-    _NavItem(icon: Icons.person_outline_rounded, activeIcon: Icons.person_rounded, label: 'Profile'),
+    _NavItem(icon: Icons.person_outline_rounded, activeIcon: Icons.person_rounded,    label: 'Profile'),
   ];
 
   @override
@@ -1002,9 +853,7 @@ class _BottomNavBar extends StatelessWidget {
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
       decoration: BoxDecoration(
         color: const Color(0xFF0F0F0F),
-        border: Border(
-          top: BorderSide(color: _AppColors.surfaceBorder, width: 0.5),
-        ),
+        border: Border(top: BorderSide(color: _AppColors.surfaceBorder, width: 0.5)),
       ),
       child: Row(
         children: List.generate(
@@ -1026,11 +875,7 @@ class _NavItem {
   final IconData icon;
   final IconData activeIcon;
   final String label;
-  const _NavItem({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-  });
+  const _NavItem({required this.icon, required this.activeIcon, required this.label});
 }
 
 class _NavBarItem extends StatelessWidget {
@@ -1038,11 +883,7 @@ class _NavBarItem extends StatelessWidget {
   final bool isActive;
   final VoidCallback onTap;
 
-  const _NavBarItem({
-    required this.item,
-    required this.isActive,
-    required this.onTap,
-  });
+  const _NavBarItem({required this.item, required this.isActive, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1056,7 +897,6 @@ class _NavBarItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Red dot indicator above active icon
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               width: isActive ? 18 : 0,
@@ -1065,19 +905,11 @@ class _NavBarItem extends StatelessWidget {
                 color: _AppColors.red,
                 borderRadius: BorderRadius.circular(2),
                 boxShadow: isActive
-                    ? [
-                  BoxShadow(
-                    color: _AppColors.red.withOpacity(0.6),
-                    blurRadius: 6,
-                  ),
-                ]
+                    ? [BoxShadow(color: _AppColors.red.withOpacity(0.6), blurRadius: 6)]
                     : null,
               ),
             ),
-
             const SizedBox(height: 6),
-
-            // Icon
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               child: Icon(
@@ -1087,10 +919,7 @@ class _NavBarItem extends StatelessWidget {
                 size: 22,
               ),
             ),
-
             const SizedBox(height: 4),
-
-            // Label
             Text(
               item.label,
               style: TextStyle(
@@ -1107,21 +936,12 @@ class _NavBarItem extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// SHARED HELPERS
-// ─────────────────────────────────────────────────────────────
-
-/// Icon button with optional notification badge
 class _IconBtn extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final int badgeCount;
 
-  const _IconBtn({
-    required this.icon,
-    required this.onTap,
-    this.badgeCount = 0,
-  });
+  const _IconBtn({required this.icon, required this.onTap, this.badgeCount = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -1159,10 +979,7 @@ class _IconBtn extends StatelessWidget {
                     child: Text(
                       '$badgeCount',
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 8,
-                        fontWeight: FontWeight.w700,
-                      ),
+                          color: Colors.white, fontSize: 8, fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),
@@ -1174,19 +991,14 @@ class _IconBtn extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// PLACEHOLDER TABS (to be built in future phases)
-// ─────────────────────────────────────────────────────────────
+// ── Tabs ──────────────────────────────────────────────────────
 
+// ✅ FIXED: was `crime_map_screen()` — now correctly `CrimeMapScreen()`
 class _MapTab extends StatelessWidget {
   const _MapTab();
 
   @override
-  Widget build(BuildContext context) => const _PlaceholderTab(
-    icon: Icons.map_rounded,
-    label: 'Crime Map',
-    phase: 'Phase 4',
-  );
+  Widget build(BuildContext context) => const CrimeMapScreen();
 }
 
 class _TrackingTab extends StatelessWidget {
@@ -1232,14 +1044,11 @@ class _PlaceholderTab extends StatelessWidget {
           children: [
             Icon(icon, color: _AppColors.textMuted, size: 40),
             const SizedBox(height: 14),
-            Text(
-              label,
-              style: const TextStyle(
-                color: _AppColors.textSecondary,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            Text(label,
+                style: const TextStyle(
+                    color: _AppColors.textSecondary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600)),
             const SizedBox(height: 6),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
@@ -1250,10 +1059,7 @@ class _PlaceholderTab extends StatelessWidget {
               ),
               child: Text(
                 'Coming in $phase',
-                style: const TextStyle(
-                  color: _AppColors.textMuted,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: _AppColors.textMuted, fontSize: 12),
               ),
             ),
           ],
@@ -1262,58 +1068,3 @@ class _PlaceholderTab extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────
-// WIRING NOTES
-// ─────────────────────────────────────────────────────────────
-//
-// 1. NAVIGATION FROM SPLASH:
-//    In SplashScreen._navigateNext():
-//      Navigator.of(context).pushReplacementNamed('/home');
-//
-// 2. ROUTE REGISTRATION (main.dart or app.dart):
-//    routes: {
-//      '/': (_) => const SplashScreen(),
-//      '/home': (_) => const HomeScreen(),
-//    }
-//
-// 3. SOS INTEGRATION (Phase 1):
-//    In _SOSHeroCardState._handleSOS():
-//      // Uncomment when MethodChannel is ready:
-//      // context.read<SOSBloc>().add(TriggerSOSEvent());
-//
-// 4. REAL DATA (Phase 1):
-//    Replace hardcoded _AlertData list in _RecentAlerts with
-//    a StreamBuilder on Firestore:
-//      stream: FirebaseFirestore.instance
-//        .collection('sos_events')
-//        .where('status', isEqualTo: 'active')
-//        .orderBy('timestamp', descending: true)
-//        .limit(10)
-//        .snapshots()
-//
-// 5. GREETING:
-//    Replace 'Good morning' with dynamic:
-//      final hour = DateTime.now().hour;
-//      final greeting = hour < 12 ? 'Good morning'
-//                     : hour < 17 ? 'Good afternoon'
-//                     : 'Good evening';
-//
-// COMMON ERRORS:
-//
-// ❌ Bottom nav overlaps content on Android gesture nav
-//    Fix: Already handled — nav bar height includes
-//         MediaQuery.of(context).padding.bottom
-//
-// ❌ IndexedStack causes "widget is behind" z-order issue
-//    Fix: Ensure Scaffold backgroundColor is set on every tab.
-//         Already done in _PlaceholderTab.
-//
-// ❌ AnimationController disposed twice on hot reload
-//    Fix: Already guarded — _pulseCtrl.dispose() in dispose().
-//         Never call dispose() manually.
-//
-// ❌ HapticFeedback throws on iOS simulator
-//    Fix: It only warns, never crashes — safe to ignore in sim.
-//         Works on real device.
-// ─────────────────────────────────────────────────────────────
